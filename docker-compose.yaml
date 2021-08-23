@@ -5,7 +5,7 @@ volumes:
   ripe_data:
 services:
   ripe:
-    image: jamesits/ripe-atlas:latest
+    image: kingpin/ripe-atlas-docker:latest
     container_name: ripe
     restart: always
     environment:
