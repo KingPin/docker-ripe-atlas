@@ -44,11 +44,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+#      - name: Extract Docker metadata
+#        id: meta
+#        uses: docker/metadata-action@v3
+#        with:
+#          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -63,6 +63,9 @@ jobs:
 
       - name: update-container-description-action
         uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
           destination_container_repo: kingpin/ripe-atlas-docker
           provider: dockerhub
