@@ -1,8 +1,6 @@
 # RIPE Atlas Docker Image
 
-This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-probe/) packaged as a Docker image.
-
-[![Build Status](https://dev.azure.com/nekomimiswitch/General/_apis/build/status/docker-ripe-atlas?branchName=master)](https://dev.azure.com/nekomimiswitch/General/_build/latest?definitionId=83&branchName=master)
+This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-probe/) packaged as a Docker image. the original code is at https://github.com/Jamesits/docker-ripe-atlas but I needed this on arm64 so here we are, thanx FOSS.
 
 ## Requirements
 
@@ -14,10 +12,9 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 
 ## Tags
 
-The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas):
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/kingpin/ripe-atlas-docker):
 
-* `latest`: For arm64 (x86\_64) devices
-* `latest-armv7l`: For armv7l (armhf) devices, e.g. Raspberry Pi (CI donated by [@OtakuNekoP](https://github.com/OtakuNekoP))
+* `latest`: For arm64, amd64 devices
 
 ## Running
 
@@ -32,7 +29,7 @@ docker run --detach --restart=always --log-opt max-size=10m \
 	-v /var/atlas-probe/status:/var/atlas-probe/status \
 	-e RXTXRPT=yes \
 	--name ripe-atlas --hostname "$(hostname --fqdn)" \
-	jamesits/ripe-atlas:latest
+	kingpin/ripe-atlas-docker:latest
 ```
 
 Then we fetch the generated public key:
