@@ -3,69 +3,90 @@ name: Docker Image CI
 on:
   schedule:
     - cron: '31 16 * * 1'
-  push:
-    branches: [ master ]
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  workflow_dispatch:
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
+      security-events: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      
-      - name: Docker Setup QEMU
+      - 
+        name: Repo Name
+        id: repo-name
+        run: echo "::set-output name=value::$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')"
+      - 
+        name: Docker Setup QEMU
         uses: docker/setup-qemu-action@v1
+        id: qemu
         with:
           platforms: amd64,arm64
-        
-      - name: Docker Setup Buildx
+      - 
+        name: Docker Setup Buildx
+        id: buildx
         uses: docker/setup-buildx-action@v1
-        
-      - name: Login to DockerHub
+      - 
+        name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
+      - 
+        name: Log into ghcr.io registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-#      - name: Extract Docker metadata
-#        id: meta
-#        uses: docker/metadata-action@v3
-#        with:
-#          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Build and push Docker image
+      -
+        name: Login to Quay.io
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+      -
+        name: Build and test docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
+          load: true
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo-name.outputs.value }}:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+#      -
+#        name: Test
+#        run: |
+#          # i dont know how to test this yet, must figure out later.
+#          docker run --rm docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo-name.outputs.value }}:test caddy version
+      - 
+        name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo-name.outputs.value }}:test
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'MEDIUM,CRITICAL,HIGH'
+          hide-progress: false
+      - 
+        name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results.sarif'
+      - 
+        name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/kingpin/ripe-atlas-docker:latest
-            kingpin/ripe-atlas-docker:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-#      - name: update-container-description-action
-#        uses: christian-korneck/update-container-description-action@v1
-#        env:
-#          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-#          DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
-#        with:
-#          destination_container_repo: kingpin/ripe-atlas-docker
-#          provider: dockerhub
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo-name.outputs.value }}:latest
+            ghcr.io/kingpin/${{ steps.repo-name.outputs.value }}:latest
+            quay.io/${{ secrets.QUAY_USERNAME }}/${{ steps.repo-name.outputs.value }}:latest
