@@ -88,5 +88,5 @@ jobs:
           cache-to: type=gha,mode=max
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo-name.outputs.value }}:latest
-            quay.io/${{ secrets.QUAY_USERNAME }}/${{ steps.repo-name.outputs.value }}:latest
+            quay.io/kingpinx1/${{ steps.repo-name.outputs.value }}:latest
             ghcr.io/kingpin/${{ steps.repo-name.outputs.value }}:latest
