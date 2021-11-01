@@ -4,11 +4,13 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 
 ## Registery
 
-This image is located both on dockerhub and github
+This image is located both on dockerhub and github and quay.io
 * https://hub.docker.com/r/kingpin/ripe-atlas-docker
 * `docker pull kingpin/ripe-atlas-docker:latest`
 * https://github.com/KingPin/ripe-atlas-docker/pkgs/container/ripe-atlas-docker 
 * `docker pull ghcr.io/kingpin/ripe-atlas-docker:latest`
+* https://quay.io/kingpinx1/ripe-atlas-docker
+* `docker pull quay.io/kingpinx1/ripe-atlas-docker`
 
 
 ## Requirements
