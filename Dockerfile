@@ -1,5 +1,5 @@
 ## builder
-FROM debian:10-slim as builder
+FROM debian:11-slim as builder
 LABEL image="ripe-atlas-builder"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GIT_URL=https://github.com/RIPE-NCC/ripe-atlas-software-probe.git
@@ -13,7 +13,7 @@ RUN git clone --recursive "$GIT_URL"
 RUN ./ripe-atlas-software-probe/build-config/debian/bin/make-deb
 
 ## the actual image
-FROM debian:10-slim
+FROM debian:11-slim
 LABEL maintainer="dockerhub@public.swineson.me"
 LABEL image="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive
